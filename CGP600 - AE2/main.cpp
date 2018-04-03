@@ -314,7 +314,7 @@ HRESULT InitialiseGraphics()
 		};
 	}
 
-	hr = D3DX11CompileFromFile("shaders.hlsl", 0, 0, "Pshader", "ps_4_0", 0, 0, 0, &PS, &error, 0);
+	hr = D3DX11CompileFromFile("shaders.hlsl", 0, 0, "PShader", "ps_4_0", 0, 0, 0, &PS, &error, 0);
 
 	if (error != 0) // check for shader compilation error
 	{
