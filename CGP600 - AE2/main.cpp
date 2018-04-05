@@ -10,23 +10,24 @@
 
 int (WINAPIV * __vsnprintf_s)(char *, size_t, const char*, va_list) = _vsnprintf;
 
-
 //////////////////////////////////////////////////////////////////////////////////////
 //	Global Variables
 //////////////////////////////////////////////////////////////////////////////////////
 HINSTANCE	g_hInst = NULL;
 HWND		g_hWnd = NULL;
-D3D_DRIVER_TYPE		g_driverType = D3D_DRIVER_TYPE_NULL;
-D3D_FEATURE_LEVEL	g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-ID3D11Device*		g_pD3DDevice = NULL;
+D3D_DRIVER_TYPE			g_driverType = D3D_DRIVER_TYPE_NULL;
+D3D_FEATURE_LEVEL		g_featureLevel = D3D_FEATURE_LEVEL_11_0;
+ID3D11Device*			g_pD3DDevice = NULL;
 ID3D11DeviceContext*    g_pImmediateContext = NULL;
-IDXGISwapChain*		g_pSwapChain = NULL;
+IDXGISwapChain*			g_pSwapChain = NULL;
 ID3D11RenderTargetView* g_pBackBufferRTView = NULL;
 
 ID3D11Buffer*			g_pVertexBuffer;
 ID3D11VertexShader*		g_pVertexShader;
 ID3D11PixelShader*		g_pPixelShader;
 ID3D11InputLayout*		g_pInputLayout;
+
+ID3D11Buffer*			g_pConstantBuffer0;
 
 // Define vertex structure
 struct POS_COL_VERTEX
@@ -36,8 +37,15 @@ struct POS_COL_VERTEX
 };
 
 // Rename for each tutorial
-char		g_TutorialName[100] = "Tutorial 03 Exercise 01\0";
+char		g_TutorialName[100] = "Tutorial 04 Exercise 01\0";
 
+// Const buffer structs. Pack to 16 bytes. Don't let any single element cross a 16 byte boundary
+struct CONSTANT_BUFFER0
+{
+	float RedAmount; // 4 bytes
+	float scale; // 4 bytes
+	XMFLOAT2 packing_bytes; // 2x4 bytes = 8 bytes
+};
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	Forward declarations
@@ -283,6 +291,16 @@ HRESULT InitialiseGraphics()
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // Allow CPU access
 	hr = g_pD3DDevice->CreateBuffer(&bufferDesc, NULL, &g_pVertexBuffer); // Create the buffer
 
+	// Create constant buffer
+	D3D11_BUFFER_DESC constant_buffer_desc;
+	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
+
+	constant_buffer_desc.Usage = D3D11_USAGE_DEFAULT; // can use UpdateSubresource() to update
+	constant_buffer_desc.ByteWidth = 16; // MUST be a multiple of 16, calculate from CB struct
+	constant_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // use as a constant buffer
+
+	hr = g_pD3DDevice->CreateBuffer(&constant_buffer_desc, NULL, &g_pConstantBuffer0);
+
 	if (FAILED(hr)) // Return error code on failure
 	{
 		return hr;
@@ -308,7 +326,7 @@ HRESULT InitialiseGraphics()
 	{
 		OutputDebugString((char*)error->GetBufferPointer());
 		error->Release();
-		if (FAILED(hr)) // don't fial if error is just a warning
+		if (FAILED(hr)) // don't fail if error is just a warning
 		{
 			return hr;
 		};
@@ -370,6 +388,7 @@ HRESULT InitialiseGraphics()
 //////////////////////////////////////////////////////////////////////////////////////
 void ShutdownD3D()
 {
+	if (g_pConstantBuffer0) g_pConstantBuffer0->Release();
 	if (g_pVertexBuffer) g_pVertexBuffer->Release();
 	if (g_pInputLayout) g_pInputLayout->Release();
 	if (g_pVertexShader) g_pVertexShader->Release();
@@ -392,6 +411,17 @@ void RenderFrame(void)
 	UINT stride = sizeof(POS_COL_VERTEX);
 	UINT offset = 0;
 	g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+
+	//Set constant buffer
+	CONSTANT_BUFFER0 cb0_values;
+	cb0_values.RedAmount = 0.5f; // 50% of vertex red value
+
+	cb0_values.scale = 0.5f; //
+
+	// upload the new values for the constant buffer
+	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer0, 0, 0, &cb0_values, 0, 0);
+
+	g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer0); // set constant buffer to be active
 
 	// Select which primitive type to use
 	g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
