@@ -29,6 +29,8 @@ ID3D11InputLayout*		g_pInputLayout;
 
 ID3D11Buffer*			g_pConstantBuffer0;
 
+//float zDistance = 3.0f;
+
 // Define vertex structure
 struct POS_COL_VERTEX
 {
@@ -37,15 +39,16 @@ struct POS_COL_VERTEX
 };
 
 // Rename for each tutorial
-char		g_TutorialName[100] = "Tutorial 04 Exercise 01\0";
+char		g_TutorialName[100] = "Tutorial 05 Exercise 01\0";
 
 // Const buffer structs. Pack to 16 bytes. Don't let any single element cross a 16 byte boundary
 struct CONSTANT_BUFFER0
 {
-	float RedAmount; // 4 bytes
-	float scale; // 4 bytes
-	XMFLOAT2 packing_bytes; // 2x4 bytes = 8 bytes
-};
+	XMMATRIX WorldViewProjection;	// 64 bytes ( 4 x 4 = 16 floats x 4 bytes )
+	float RedAmount;				// 4 bytes
+	float scale;					// 4 bytes
+	XMFLOAT2 packing_bytes;			// 2x4 bytes = 8 bytes
+};									// Total = 80 bytes
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	Forward declarations
@@ -296,7 +299,7 @@ HRESULT InitialiseGraphics()
 	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
 
 	constant_buffer_desc.Usage = D3D11_USAGE_DEFAULT; // can use UpdateSubresource() to update
-	constant_buffer_desc.ByteWidth = 16; // MUST be a multiple of 16, calculate from CB struct
+	constant_buffer_desc.ByteWidth = 80; // MUST be a multiple of 16, calculate from CB struct
 	constant_buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // use as a constant buffer
 
 	hr = g_pD3DDevice->CreateBuffer(&constant_buffer_desc, NULL, &g_pConstantBuffer0);
@@ -403,6 +406,8 @@ void ShutdownD3D()
 // Render frame
 void RenderFrame(void)
 {
+
+
 	// Clear the back buffer - choose a colour you like
 	float rgba_clear_colour[4] = { 0.1f, 0.4f, 0.1f, 1.0f };
 	g_pImmediateContext->ClearRenderTargetView(g_pBackBufferRTView, rgba_clear_colour);
@@ -415,9 +420,21 @@ void RenderFrame(void)
 	//Set constant buffer
 	CONSTANT_BUFFER0 cb0_values;
 	cb0_values.RedAmount = 0.5f; // 50% of vertex red value
+	cb0_values.scale = 0.5f; // 50% scale
 
-	cb0_values.scale = 0.5f; //
-
+	XMMATRIX projection, world, view;
+	
+	//world = XMMatrixTranslation(1.0f, -1.0f, 3.0f);
+	//world = XMMatrixRotationZ(XMConvertToRadians(45));
+	//world *= XMMatrixTranslation(2.0f, 0.0f, 10.0f);
+	//world = XMMatrixTranslation(2.0f, 0.0f, 10.0f);
+	//world *= XMMatrixRotationZ(XMConvertToRadians(45));
+	world = XMMatrixRotationX(XMConvertToRadians(0));
+	world *= XMMatrixTranslation(0, 0, 5);
+	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0), 640.0 / 480.0, 1.0, 100.0);
+	view = XMMatrixIdentity();
+	cb0_values.WorldViewProjection = world * view * projection;
+	
 	// upload the new values for the constant buffer
 	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer0, 0, 0, &cb0_values, 0, 0);
 
