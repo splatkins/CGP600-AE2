@@ -83,8 +83,8 @@ c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2732)
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2742): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2743): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2754): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(262): warning C4244: '=': conversion from 'UINT' to 'FLOAT', possible loss of data
-c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(263): warning C4244: '=': conversion from 'UINT' to 'FLOAT', possible loss of data
-c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(434): warning C4305: 'argument': truncation from 'double' to 'FLOAT'
+c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(301): warning C4244: '=': conversion from 'UINT' to 'FLOAT', possible loss of data
+c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(302): warning C4244: '=': conversion from 'UINT' to 'FLOAT', possible loss of data
+c:\users\splatkins\documents\university\year 3\cgp600 - agp\github\cgp600-ae2\cgp600 - ae2\main.cpp(545): warning C4305: 'argument': truncation from 'double' to 'FLOAT'
   CGP600 - AE2.vcxproj -> C:\Users\Splatkins\Documents\University\Year 3\CGP600 - AGP\GitHub\CGP600-AE2\CGP600 - AE2\Debug\CGP600 - AE2.exe
   CGP600 - AE2.vcxproj -> C:\Users\Splatkins\Documents\University\Year 3\CGP600 - AGP\GitHub\CGP600-AE2\CGP600 - AE2\Debug\CGP600 - AE2.pdb (Partial PDB)
