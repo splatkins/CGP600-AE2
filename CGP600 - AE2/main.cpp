@@ -28,7 +28,7 @@ ID3D11PixelShader*		g_pPixelShader;
 ID3D11InputLayout*		g_pInputLayout;
 
 ID3D11Buffer*			g_pConstantBuffer0;
-ID3D11Buffer*			g_pConstantBuffer1;
+//ID3D11Buffer*			g_pConstantBuffer1;
 
 ID3D11DepthStencilView* g_pZBuffer;
 
@@ -53,13 +53,13 @@ struct CONSTANT_BUFFER0
 	XMFLOAT2 packing_bytes;			// 2x4 bytes = 8 bytes
 };									// Total = 80 bytes
 
-struct CONSTANT_BUFFER1
-{
-	XMMATRIX WorldViewProjection;	// 64 bytes ( 4 x 4 = 16 floats x 4 bytes )
-	float RedAmount;				// 4 bytes
-	float scale;					// 4 bytes
-	XMFLOAT2 packing_bytes;			// 2x4 bytes = 8 bytes
-};									// Total = 80 bytes
+//struct CONSTANT_BUFFER1
+//{
+//	XMMATRIX WorldViewProjection;	// 64 bytes ( 4 x 4 = 16 floats x 4 bytes )
+//	float RedAmount;				// 4 bytes
+//	float scale;					// 4 bytes
+//	XMFLOAT2 packing_bytes;			// 2x4 bytes = 8 bytes
+//};									// Total = 80 bytes
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	Forward declarations
@@ -396,14 +396,14 @@ HRESULT InitialiseGraphics()
 	hr = g_pD3DDevice->CreateBuffer(&constant_buffer_desc, NULL, &g_pConstantBuffer0);
 
 	// Create constant buffer
-	D3D11_BUFFER_DESC constant_buffer_desc1;
-	ZeroMemory(&constant_buffer_desc1, sizeof(constant_buffer_desc1));
+	//D3D11_BUFFER_DESC constant_buffer_desc1;
+	//ZeroMemory(&constant_buffer_desc1, sizeof(constant_buffer_desc1));
 
-	constant_buffer_desc1.Usage = D3D11_USAGE_DEFAULT; // can use UpdateSubresource() to update
-	constant_buffer_desc1.ByteWidth = 80; // MUST be a multiple of 16, calculate from CB struct
-	constant_buffer_desc1.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // use as a constant buffer
+	//constant_buffer_desc1.Usage = D3D11_USAGE_DEFAULT; // can use UpdateSubresource() to update
+	//constant_buffer_desc1.ByteWidth = 80; // MUST be a multiple of 16, calculate from CB struct
+	//constant_buffer_desc1.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // use as a constant buffer
 
-	hr = g_pD3DDevice->CreateBuffer(&constant_buffer_desc1, NULL, &g_pConstantBuffer1);
+	//hr = g_pD3DDevice->CreateBuffer(&constant_buffer_desc1, NULL, &g_pConstantBuffer1);
 
 	if (FAILED(hr)) // Return error code on failure
 	{
@@ -492,7 +492,7 @@ HRESULT InitialiseGraphics()
 //////////////////////////////////////////////////////////////////////////////////////
 void ShutdownD3D()
 {
-	if (g_pConstantBuffer1) g_pConstantBuffer1->Release();
+	//if (g_pConstantBuffer1) g_pConstantBuffer1->Release();
 	if (g_pConstantBuffer0) g_pConstantBuffer0->Release();
 	if (g_pVertexBuffer) g_pVertexBuffer->Release();
 	if (g_pInputLayout) g_pInputLayout->Release();
@@ -524,9 +524,9 @@ void RenderFrame(void)
 	cb0_values.RedAmount = 1.0f; // 50% of vertex red value
 	cb0_values.scale = 1.0f; // 50% scale
 
-	CONSTANT_BUFFER1 cube2_values;
+	/*CONSTANT_BUFFER1 cube2_values;
 	cube2_values.RedAmount = 1.0f;
-	cube2_values.scale = 1.0f;
+	cube2_values.scale = 1.0f;*/
 
 	XMMATRIX projection, world, view, newWorld;
 	
@@ -546,22 +546,26 @@ void RenderFrame(void)
 	view = XMMatrixIdentity();
 	cb0_values.WorldViewProjection = world * view * projection;
 
-	newWorld = XMMatrixRotationX(XMConvertToRadians(30));
-	newWorld *= XMMatrixRotationY(XMConvertToRadians(45));
-	newWorld *= XMMatrixRotationZ(XMConvertToRadians(0));
-	newWorld *= XMMatrixTranslation(0, 1, 17);
-
-	cube2_values.WorldViewProjection = newWorld * view * projection;
+	
 
 	// upload the new values for the constant buffer
 	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer0, 0, 0, &cb0_values, 0, 0);
-	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer1, 0, 0, &cube2_values, 0, 0);
+	//g_pImmediateContext->UpdateSubresource(g_pConstantBuffer1, 0, 0, &cube2_values, 0, 0);
 
-	g_pImmediateContext->VSSetConstantBuffers(0, 2, &g_pConstantBuffer0); // set constant buffer to be active
+	g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer0); // set constant buffer to be active
 	g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	g_pImmediateContext->Draw(36, 0);
 
-	g_pImmediateContext->VSSetConstantBuffers(0, 2, &g_pConstantBuffer1); // set constant buffer to be active
+	newWorld = XMMatrixRotationX(XMConvertToRadians(30));
+	newWorld *= XMMatrixRotationY(XMConvertToRadians(45));
+	newWorld *= XMMatrixRotationZ(XMConvertToRadians(0));
+	newWorld *= XMMatrixTranslation(0, 1, 9);
+
+	//cube2_values.WorldViewProjection = newWorld * view * projection;
+	cb0_values.WorldViewProjection = newWorld * view * projection;
+
+	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer0, 0, 0, &cb0_values, 0, 0);
+	g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pConstantBuffer0); // set constant buffer to be active
 
 	// Select which primitive type to use
 	g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
