@@ -7,6 +7,7 @@
 #include <dxerr.h>
 #include <stdio.h>
 #include <xnamath.h>
+#include "camera.h"
 
 int (WINAPIV * __vsnprintf_s)(char *, size_t, const char*, va_list) = _vsnprintf;
 
@@ -32,6 +33,8 @@ ID3D11Buffer*			g_pConstantBuffer0;
 
 ID3D11DepthStencilView* g_pZBuffer;
 
+Camera*					g_pCamera;
+
 //float zDistance = 3.0f;
 
 // Define vertex structure
@@ -42,7 +45,7 @@ struct POS_COL_VERTEX
 };
 
 // Rename for each tutorial
-char		g_TutorialName[100] = "Tutorial 06 Exercise 01\0";
+char		g_TutorialName[100] = "Tutorial 07 Exercise 01\0";
 
 // Const buffer structs. Pack to 16 bytes. Don't let any single element cross a 16 byte boundary
 struct CONSTANT_BUFFER0
@@ -484,6 +487,9 @@ HRESULT InitialiseGraphics()
 	g_pImmediateContext->IASetInputLayout(g_pInputLayout);
 
 	return S_OK;
+
+	g_pCamera = new Camera(0.0f, 0.0f, -0.5f, 0.0f);
+	
 }
 
 
@@ -492,6 +498,7 @@ HRESULT InitialiseGraphics()
 //////////////////////////////////////////////////////////////////////////////////////
 void ShutdownD3D()
 {
+	if (g_pCamera) delete g_pCamera;
 	//if (g_pConstantBuffer1) g_pConstantBuffer1->Release();
 	if (g_pConstantBuffer0) g_pConstantBuffer0->Release();
 	if (g_pVertexBuffer) g_pVertexBuffer->Release();
@@ -529,24 +536,25 @@ void RenderFrame(void)
 	cube2_values.scale = 1.0f;*/
 
 	XMMATRIX projection, world, view, newWorld;
-	
+
 	//world = XMMatrixTranslation(1.0f, -1.0f, 3.0f);
 	//world = XMMatrixRotationZ(XMConvertToRadians(45));
 	//world *= XMMatrixTranslation(2.0f, 0.0f, 10.0f);
-	
+
 	//world = XMMatrixTranslation(0.0f, 0.0f, 3.0f);
 	//world *= XMMatrixRotationZ(XMConvertToRadians(45));
-	
+
 	world = XMMatrixRotationX(XMConvertToRadians(-30));
 	world *= XMMatrixRotationY(XMConvertToRadians(45));
 	world *= XMMatrixRotationZ(XMConvertToRadians(0));
 	world *= XMMatrixTranslation(0, 0, 15);
 
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0), 640.0 / 480.0, 1.0, 100.0);
-	view = XMMatrixIdentity();
-	cb0_values.WorldViewProjection = world * view * projection;
 
-	
+	//view = XMMatrixIdentity();
+	view = g_pCamera->GetViewMatrix();
+
+	cb0_values.WorldViewProjection = world * view * projection;
 
 	// upload the new values for the constant buffer
 	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer0, 0, 0, &cb0_values, 0, 0);
